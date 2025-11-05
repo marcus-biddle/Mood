@@ -1,6 +1,6 @@
 import express from 'express';
-import { Configuration, OpenAIApi } from 'openai';
-import { openai, supabase } from '../config/env.js';
+import { supabase } from '../config/env.js';
+import { generateEmbedding } from '../embeddings/generateEmbeddings.js';
 
 const router = express.Router();
 
@@ -20,15 +20,11 @@ router.post('/search', async (req, res) => {
     if (!query) return res.status(400).json({ error: 'Missing query string' });
 
     // Generate embedding vector for user query
-    const embeddingResponse = await openai.createEmbedding({
-      model: 'text-embedding-3-small',
-      input: query,
-    });
-    const queryEmbedding = embeddingResponse.data.data[0].embedding;
+    const embedding = await generateEmbedding(query);
 
     // Call Supabase RPC function to find similar songs
     const { data, error } = await supabase.rpc('match_songs', {
-      query_embedding: queryEmbedding,
+      query_embedding: embedding,
     });
 
     if (error) {
