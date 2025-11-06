@@ -2,10 +2,6 @@ Core Features:
 
 Aggregate comprehensive music data from open APIs like Spotify, MusicBrainz, and Genius including metadata on songs, artists, lyrics, genres, moods, and release dates.
 
-Implement an embedding model to convert music features, lyrics, or descriptions into vector representations for semantic similarity comparison.
-
-Provide a user-friendly web interface that allows users to perform semantic search queries such as “songs similar to X,” “uplifting tracks,” or “music with poetic lyrics,” enabling discovery beyond simple keywords.
-
 Deliver search results with sub-second latency for a smooth user experience.
 
 Display relationships or trends visually between tracks, artists, albums, or moods to aid exploration.

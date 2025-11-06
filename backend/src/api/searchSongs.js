@@ -38,4 +38,35 @@ router.post('/search', async (req, res) => {
   }
 });
 
+router.post('/find-mood-song', async (req, res) => {
+  try {
+    const { query } = req.body;
+    if (!query || typeof query !== 'string' || !query.trim()) {
+      return res.status(400).json({ error: 'Missing or invalid query text' });
+    }
+
+    const prompt = `
+      Generate a list of the biggest emotions a human can feel from music and decide what music this person would need based off the below text.
+      Text:
+      "${query.trim()}"
+    `;
+
+    // Call OpenAI completion endpoint with prompt (you can choose chat or text completion)
+    const embedding = await generateEmbedding(prompt);
+
+    const { data, error } = await supabase.rpc('match_songs_by_mood', {
+      user_mood: embedding
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    res.json({ results: data });
+  } catch (error) {
+    console.error('Mood vector search API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

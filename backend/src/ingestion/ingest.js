@@ -8,13 +8,31 @@ import { generateEmbedding } from '../embeddings/generateEmbeddings.js';
 const SPOTIFY_ACCESS_TOKEN = process.env.SPOTIFY_ACCESS_TOKEN || '';
 
 // Fetch songs from MusicBrainz by genre (example: rap)
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function fetchMusicBrainzSongs() {
-  const url = 'https://musicbrainz.org/ws/2/recording?query=tag:energetic&limit=100&fmt=json';
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'YourAppName/1.0 (your-email@example.com)' }
-  });
-  const data = await response.json();
-  return data.recordings || [];
+  const urls = [
+    'https://musicbrainz.org/ws/2/recording?query=tag:rap+AND+country:US&limit=100&fmt=json',
+    'https://musicbrainz.org/ws/2/recording?query=tag:pop+AND+country:US&limit=100&fmt=json',
+    'https://musicbrainz.org/ws/2/recording?query=tag:alternative%pop+AND+country:US&limit=100&fmt=json',
+    'https://musicbrainz.org/ws/2/recording?query=tag:sad%pop+AND+country:US&limit=100&fmt=json',
+    'https://musicbrainz.org/ws/2/recording?query=tag:sad%alternative+AND+country:US&limit=100&fmt=json'
+  ]
+
+  let allRecordings = [];
+
+  for (const url of urls) {
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'YourAppName/1.0 (your-email@example.com)' }
+    });
+    const result = await response.json();
+    allRecordings = allRecordings.concat(result.recordings || []);
+    await delay(1100); // Wait 1.1 seconds between requests to respect rate limit
+  }
+
+  return allRecordings;
 }
 
 // Search Spotify API to get track details including preview URL
@@ -29,53 +47,60 @@ async function searchSpotifyTrack(trackName, artistName) {
     return null;
   }
   const data = await response.json();
-  return data.tracks.items.length > 0 ? data.tracks.items[0] : null;
+
+  // Filter tracks to those with images, since images are on album property
+  const tracksWithImages = data.tracks.items.filter(track =>
+    track.album && Array.isArray(track.album.images) && track.album.images.length > 0
+  );
+
+  // Return the first track with images or null if none found
+  return tracksWithImages[0] ? tracksWithImages[0] : null;
 }
 
-async function generateMoodVector(song) {
+export async function generateOpenAIVectorResponse(prompt) {
+  return await openai.responses.create({
+    model: "gpt-4o-mini",
+    input: [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "input_text",
+            "text": prompt
+          }
+        ]
+      }
+    ],
+    text: {
+      "format": {
+        "type": "text"
+      }
+    },
+    reasoning: {},
+    tools: [],
+    temperature: 1,
+    max_output_tokens: 2048,
+    top_p: 1,
+    store: true,
+    include: ["web_search_call.action.sources"]
+  });
+}
+
+async function generateMoodEmbedding(song) {
   const prompt = `
-    Rate the following song on a scale from 0 to 1 for each mood:
-    [happy, sad, energetic, calm, angry, romantic, melancholic, uplifting, chill, nostalgic]
-    Song: "${song.title}" by ${song.artist}
-    Genres: ${song.genres?.join(", ") || "none"}
-    Tags: ${song.tags?.join(", ") || "none"}
-    Return only a JSON array of 10 numbers.
+    Generate a list of the biggest emotions a human has when listening to music genres. Decide what type of emotion and feelings a person would have based on the song below.
+
+    Song metadata:
+    Title: "${song.title}"
+    Artist: "${song.artist}"
+    Genres: ${song.genres.length ? song.genres.join(", ") : "none"}
+    Tags: ${song.tags.length ? song.tags.join(", ") : "none"}
   `;
 
   try {
-    const response = await openai.responses.create({
-  model: "gpt-4o-mini",
-  input: [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "input_text",
-          "text": prompt
-        }
-      ]
-    }
-  ],
-  text: {
-    "format": {
-      "type": "text"
-    }
-  },
-  reasoning: {},
-  tools: [],
-  temperature: 1,
-  max_output_tokens: 2048,
-  top_p: 1,
-  store: true,
-  include: ["web_search_call.action.sources"]
-});
-
-  const text = response.output_text;
-
-  const arr = JSON.parse(text.match(/\[.*\]/s)[0]);
-  return arr;
+    return await generateEmbedding(prompt);
   } catch (error) {
-    console.error("Error generating mood vector:", error);
+    console.error("Error generating mood embedding:", error);
     return new Array(10).fill(0.5); // fallback neutral mood
   }
 }
@@ -96,12 +121,18 @@ async function ingestSongs() {
     const artistName = mbSong['artist-credit']?.[0]?.name ?? 'Unknown Artist';
     const spotifyTrack = await searchSpotifyTrack(mbSong.title, artistName);
 
+    if (!spotifyTrack || spotifyTrack.album.images.length < 1) {
+      // Skip this song if no Spotify track found
+      console.log(`Skipping song with no Spotify track: ${mbSong.title}`);
+      continue;
+    }
+
     // Generate embedding from combined metadata (title + artist + genres)
     const combinedText = `${mbSong.title} ${artistName} ${(mbSong.tags || []).map(t => t.name).join(" ")}`;
     const embedding = await generateEmbedding(combinedText);
 
     // Generate mood vector from OpenAI GPT
-    const moodVector = await generateMoodVector({
+    const moodEmbedding = await generateMoodEmbedding({
       title: mbSong.title,
       artist: artistName,
       genres: mbSong.tags ? mbSong.tags.map(tag => tag.name) : [],
@@ -115,9 +146,10 @@ async function ingestSongs() {
       album: mbSong['releases'] ? mbSong['releases'][0]?.title : null,
       release_date: mbSong['first-release-date'] || null,
       genres: mbSong.tags ? mbSong.tags.map(tag => tag.name) : [],
-      mood_vector: moodVector,
+      mood_vector: moodEmbedding,
       embedding: embedding,
       spotify_track_id: spotifyTrack ? spotifyTrack.id : null,
+      spotify_image: spotifyTrack ? spotifyTrack.album.images[0].url : null,
       audio_preview_url: spotifyTrack ? spotifyTrack.preview_url : null,
       popularity: spotifyTrack ? spotifyTrack.popularity : null,
     };
@@ -131,4 +163,4 @@ async function ingestSongs() {
   }
 }
 
-ingestSongs();
+// ingestSongs();

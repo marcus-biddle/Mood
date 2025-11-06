@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BsSliders2 } from 'react-icons/bs';
 import { FaRegHeart } from 'react-icons/fa';
 import { BsSearch } from 'react-icons/bs';
@@ -15,6 +15,8 @@ import {
 } from 'chart.js';
 import { Radar } from 'react-chartjs-2';
 import { supabase } from './supabaseClient';
+import { SongSearch } from './components/SongSearch';
+import {MoodSearch} from './components/moodSearch';
 
 // Register components required for radar charts
 Chart.register(
@@ -50,7 +52,7 @@ export default function App() {
   const [chartData, setChartData] = useState(initialData);
   const [searchResults, setSearchResults] = useState([]);
   const [isFiltersOpen, setOpenFilters] = useState(false);
-  const [currentView, setCurrentView] = useState('choice'); // 'choice', 'mood', 'song', 'both'
+  const [currentView, setCurrentView] = useState('mood'); // 'choice', 'mood', 'song', 'both'
   const [mood, setMood] = useState('');
   const [songSearch, setSongSearch] = useState('');
 
@@ -110,20 +112,25 @@ const handleClick = (event) => {
   console.log('Decimal value:', decimalValue);
 };
 
+useEffect(() => {
+  if (searchResults.length > 0) {
+    setCurrentView('choice')
+  }
+}, [searchResults])
 
   return (
-    <div className=' relative h-screen items-center justify-center bg-linear-to-br from-green-300 via-emerald-300 to-teal-300 w-screen'>
+    <div className=' relative min-h-screen items-center justify-center bg-linear-to-t from-slate-600 via-blue-500 to-teal-300 w-screen'>
       <div className='w-full flex items-center justify-center p-8 gap-2'>
-        <button onClick={() => setCurrentView('mood')} className='bg-linear-to-br from-purple-500 to-pink-500 rounded-md p-3'>
+        <button onClick={() => setCurrentView(prev => prev === 'mood' ? 'choice' : 'mood')} className='bg-linear-to-br from-purple-500 to-pink-500 rounded-md p-3'>
           <FaRegHeart className='size-6' />
         </button>
-        <button onClick={() => setCurrentView('song')} className='bg-linear-to-br from-blue-500 to-cyan-500 rounded-md p-3'>
+        <button onClick={() => setCurrentView(prev => prev === 'song' ? 'choice' : 'song')} className='bg-linear-to-br from-blue-500 to-cyan-500 rounded-md p-3'>
           <FaMusic className='size-6' />
         </button>
-        <button onClick={() => setOpenFilters(true)} className="bg-black p-3 rounded-md w-full flex items-center justify-center gap-2">
+        {/* <button onClick={() => setOpenFilters(true)} className="bg-black p-3 rounded-md w-full flex items-center justify-center gap-2">
           <BsSliders2 className='size-6' />
           <span className=' text-lg'>Filter</span>
-        </button>
+        </button> */}
       </div>
 
       {(currentView === 'mood' || currentView === 'both') && (
@@ -134,60 +141,44 @@ const handleClick = (event) => {
               </div>
               <h2 className="text-lg font-semibold text-gray-900">How are you feeling?</h2>
             </div>
+
+            <MoodSearch setSearchResults={setSearchResults} />
             
-            <textarea
+            {/* <textarea
               value={mood}
               onChange={(e) => setMood(e.target.value)}
               placeholder="Express yourself... feeling happy, nostalgic, adventurous, peaceful..."
               className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-400 min-h-[100px] text-base"
               autoFocus
-            />
+            /> */}
             
-            {/* {mood && (
-              <div className="flex items-start gap-2 bg-purple-50 rounded-lg p-3">
-                <Sparkles size={18} className="text-purple-600 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-purple-700">
-                  {currentView === 'mood' ? "Great! Now you can search for specific songs to match your vibe." : "Perfect! Add some songs below if you'd like."}
-                </p>
-              </div>
-            )} */}
           </div>
         )}
 
         {currentView === 'song' && (
           <div className="bg-white rounded-2xl shadow-md p-5 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500 mx-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-linear-to-br from-blue-500 to-cyan-500 rounded-full">
-                <FaMusic className='size-6'/>
+              <div className="p-3 bg-linear-to-br from-blue-500 to-cyan-500 rounded-full">
+                <FaMusic className='size-4'/>
               </div>
               <h2 className="text-base font-semibold text-gray-900">Search for songs</h2>
               {currentView === 'mood' && <span className="text-xs text-gray-500">(optional)</span>}
             </div>
             
-            <div className="relative">
-              <BsSearch className="absolute size-3 left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={songSearch}
-                onChange={(e) => setSongSearch(e.target.value)}
-                placeholder="Song name or artist..."
-                className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
-                autoFocus={currentView === 'song'}
-              />
-            </div>
+            <SongSearch currentView={currentView} songSearch={songSearch} setSongSearch={setSongSearch} searchResults={searchResults} setSearchResults={setSearchResults} />
           </div>
         )}
 
-      <div className='min-h-[75vh]'>
+      {/* <div className='min-h-[75vh]'>
         <Radar
           ref={chartRef}
           data={chartData}
           onClick={handleClick}
           options={{ responsive: true, maintainAspectRatio: false }}
         />
-      </div>
+      </div> */}
 
-      <div style={{ margin: '20px 0' }}>
+      {/* <div style={{ margin: '20px 0' }}>
         {moodAttributes.map((mood, idx) => (
           <div key={mood} style={{ marginBottom: 10 }}>
             <label>{mood}: {chartData.datasets[0].data[idx].toFixed(2)}</label>
@@ -201,25 +192,22 @@ const handleClick = (event) => {
             />
           </div>
         ))}
-      </div>
+      </div> */}
 
       <div>
-        <h3>Search Results</h3>
-        <button onClick={() => handleSearch()}>Search results</button>
-        <ul>
-          {searchResults.map((song) => (
-            <li key={song.id}>{song.title} by {song.artist}</li>
-          ))}
-        </ul>
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 p-4">
+  {searchResults.map((song) => (
+    <li key={song.id} className="flex justify-center flex-col space-y-6 items-center p-4 text-black bg-slate-900/50 rounded-md">
+      <img src={song.spotify_image} alt={song.title} className="w-30 h-30 object-cover rounded-xl" />
+      <div className='flex flex-col justify-center items-center'>
+        <p className=' text-sm font-bold'>{song.title}</p>
+        <p>{song.artist}</p>
+      </div> 
+        
+    </li>
+  ))}
+</ul>
       </div>
-
-      {isFiltersOpen && (
-        <div 
-        className={`fixed h-screen bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 transition-transform duration-300 max-h-[87vh] flex flex-col ${
-          isFiltersOpen ? 'translate-y-0' : 'translate-y-full'
-        }`}
-      >test</div>
-      )}
     </div>
   );
 }
