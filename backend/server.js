@@ -5,23 +5,28 @@ import searchSongsRouter from './src/api/searchSongs.js';
 const app = express();
 
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? ['https://mood-q5ju.onrender.com']
-  : ['http://localhost:5173', 'https://mood-q5ju.onrender.com'];
+  ? ['https://yourproductiondomain.com']
+  : ['http://localhost:5173', 'https://yourproductiondomain.com'];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps, curl)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
-      callback(null, true);
+      return callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      return callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true // if you use cookies or authorization headers
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200,
 };
 
+// Use CORS before your routes
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use('/api', searchSongsRouter);
 
