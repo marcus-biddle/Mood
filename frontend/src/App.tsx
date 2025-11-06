@@ -169,7 +169,7 @@ useEffect(() => {
       </div>
       <div className='flex flex-col justify-center w-full items-start'>
         <p className=' text-md truncate font-semibold max-w-full'>{song.title}</p>
-        <p className="text-gray-300 text-sm truncate">{song.artist}</p>
+        <p className="text-gray-300 text-sm truncate max-w-full">{song.artist}</p>
       </div> 
         
     </li>
