@@ -23,7 +23,7 @@ export const MoodSearch = ({
       });
       console.log(response.data.results)
       setSearchResults(response.data.results || []);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.response?.data?.error || 'Search failed');
       setSearchResults([]);
     } finally {

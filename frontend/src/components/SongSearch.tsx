@@ -16,10 +16,10 @@ export const SongSearch = ({
     setSearchResults
 }: Props) => {
 //   const [query, setQuery] = useState('');
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = async (e) => {
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     console.log('Searching....')
     e.preventDefault();
     if (!songSearch) {

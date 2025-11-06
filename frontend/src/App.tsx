@@ -1,116 +1,83 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { BsSliders2 } from 'react-icons/bs';
+import { useEffect, useState } from 'react';
 import { FaRegHeart } from 'react-icons/fa';
-import { BsSearch } from 'react-icons/bs';
 import { FaMusic } from 'react-icons/fa6';
-import {
-  Chart,
-  RadarController,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-} from 'chart.js';
-import { Radar } from 'react-chartjs-2';
-import { supabase } from './supabaseClient';
 import { SongSearch } from './components/SongSearch';
 import {MoodSearch} from './components/moodSearch';
 
-// Register components required for radar charts
-Chart.register(
-  RadarController,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-);
 
-const moodAttributes = [
-  "happy",
-  "sad",
-  "energetic",
-  "calm",
-  "angry",
-  "romantic",
-  "melancholic",
-  "uplifting",
-  "chill",
-  "nostalgic",
-];
-
-const initialData = {
-  labels: moodAttributes,
-  datasets: [{ label: 'Mood Allocation', data: new Array(moodAttributes.length).fill(1), backgroundColor: 'rgba(75,192,192,0.2)', borderColor: 'rgba(75,192,192,1)', borderWidth: 2 }],
-};
+// const moodAttributes = [
+//   "happy",
+//   "sad",
+//   "energetic",
+//   "calm",
+//   "angry",
+//   "romantic",
+//   "melancholic",
+//   "uplifting",
+//   "chill",
+//   "nostalgic",
+// ];
 
 export default function App() {
-  const chartRef = useRef(null);
-  const [chartData, setChartData] = useState(initialData);
   const [searchResults, setSearchResults] = useState([]);
-  const [isFiltersOpen, setOpenFilters] = useState(false);
   const [currentView, setCurrentView] = useState('mood'); // 'choice', 'mood', 'song', 'both'
-  const [mood, setMood] = useState('');
   const [songSearch, setSongSearch] = useState('');
 
-  const handleSearch = async () => {
-  const { data, error } = await supabase.rpc("search_songs_by_mood", {
-    search_vector: chartData.datasets[0].data,
-    limit_count: 20,
-  });
+//   const handleSearch = async () => {
+//   const { data, error } = await supabase.rpc("search_songs_by_mood", {
+//     search_vector: chartData.datasets[0].data,
+//     limit_count: 20,
+//   });
 
-  console.log(data);
+//   console.log(data);
 
-  if (error) {
-    console.error("Error fetching songs:", error);
-  } else {
-    setSearchResults(data)
-  }
-};
+//   if (error) {
+//     console.error("Error fetching songs:", error);
+//   } else {
+//     setSearchResults(data)
+//   }
+// };
 
-  const updateMoodValue = (index, value) => {
-  const newDataset = [...chartData.datasets];
-  const newData = [...newDataset[0].data];
-  newData[index] = value;
-  newDataset[0].data = newData;
-  setChartData({
-    ...chartData,
-    datasets: newDataset,
-  });
-};
+//   const updateMoodValue = (index, value) => {
+//   const newDataset = [...chartData.datasets];
+//   const newData = [...newDataset[0].data];
+//   newData[index] = value;
+//   newDataset[0].data = newData;
+//   setChartData({
+//     ...chartData,
+//     datasets: newDataset,
+//   });
+// };
 
-const getDecimalFromCoords = (x, y, centerX, centerY, maxRadius) => {
-  console.log(x, y, centerX, centerY, maxRadius)
-  const dx = x - centerX;
-  const dy = y - centerY;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  const decimal = distance / maxRadius;
-  return Math.min(Math.max(decimal, 0), 1);
-};
+// const getDecimalFromCoords = (x, y, centerX, centerY, maxRadius) => {
+//   console.log(x, y, centerX, centerY, maxRadius)
+//   const dx = x - centerX;
+//   const dy = y - centerY;
+//   const distance = Math.sqrt(dx * dx + dy * dy);
+//   const decimal = distance / maxRadius;
+//   return Math.min(Math.max(decimal, 0), 1);
+// };
 
-const handleClick = (event) => {
-  const chart = chartRef.current;
-  if (!chart) return;
+// const handleClick = (event) => {
+//   const chart = chartRef.current;
+//   if (!chart) return;
 
-  const elements = chart.getElementsAtEventForMode(event.nativeEvent, 'nearest', { intersect: false }, true);
-  if (elements.length === 0) return;
+//   const elements = chart.getElementsAtEventForMode(event.nativeEvent, 'nearest', { intersect: false }, true);
+//   if (elements.length === 0) return;
 
-  const point = elements[0].element;
-  const { x, y } = point;
+//   const point = elements[0].element;
+//   const { x, y } = point;
 
-  const chartArea = chart.chartArea;
-  console.log(chartArea)
-  const centerX = (chartArea.left + chartArea.right) / 2;
-  const centerY = (chartArea.top + chartArea.bottom) / 2;
-  const maxRadius = Math.min(chartArea.right - chartArea.left, chartArea.bottom - chartArea.top) / 2;
+//   const chartArea = chart.chartArea;
+//   console.log(chartArea)
+//   const centerX = (chartArea.left + chartArea.right) / 2;
+//   const centerY = (chartArea.top + chartArea.bottom) / 2;
+//   const maxRadius = Math.min(chartArea.right - chartArea.left, chartArea.bottom - chartArea.top) / 2;
 
-  const decimalValue = getDecimalFromCoords(x, y, centerX, centerY, maxRadius);
+//   const decimalValue = getDecimalFromCoords(x, y, centerX, centerY, maxRadius);
 
-  console.log('Decimal value:', decimalValue);
-};
+//   console.log('Decimal value:', decimalValue);
+// };
 
 useEffect(() => {
   if (searchResults.length > 0) {
@@ -119,7 +86,7 @@ useEffect(() => {
 }, [searchResults])
 
   return (
-    <div className=' relative min-h-screen items-center justify-center bg-linear-to-t from-slate-600 via-blue-500 to-teal-300 w-screen'>
+    <div className=' relative min-h-screen items-center justify-center bg-linear-to-t from-slate-700 via-blue-500 to-teal-600 w-screen'>
       <div className='w-full flex items-center justify-center p-8 gap-2'>
         <button onClick={() => setCurrentView(prev => prev === 'mood' ? 'choice' : 'mood')} className='bg-linear-to-br from-purple-500 to-pink-500 rounded-md p-3'>
           <FaRegHeart className='size-6' />
@@ -162,10 +129,9 @@ useEffect(() => {
                 <FaMusic className='size-4'/>
               </div>
               <h2 className="text-base font-semibold text-gray-900">Search for songs</h2>
-              {currentView === 'mood' && <span className="text-xs text-gray-500">(optional)</span>}
             </div>
             
-            <SongSearch currentView={currentView} songSearch={songSearch} setSongSearch={setSongSearch} searchResults={searchResults} setSearchResults={setSearchResults} />
+            <SongSearch currentView={currentView} songSearch={songSearch} setSongSearch={setSongSearch} setSearchResults={setSearchResults} />
           </div>
         )}
 
@@ -194,14 +160,16 @@ useEffect(() => {
         ))}
       </div> */}
 
-      <div>
+      <div className="max-w-7xl mx-auto">
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 p-4">
-  {searchResults.map((song) => (
-    <li key={song.id} className="flex justify-center flex-col space-y-6 items-center p-4 text-black bg-slate-900/50 rounded-md">
-      <img src={song.spotify_image} alt={song.title} className="w-30 h-30 object-cover rounded-xl" />
-      <div className='flex flex-col justify-center items-center'>
-        <p className=' text-sm font-bold'>{song.title}</p>
-        <p>{song.artist}</p>
+  {searchResults.map((song: any) => (
+    <li key={song.id} className="flex flex-col items-center backdrop-blur-3xl transition-all duration-300 cursor-pointer group p-4 text-black bg-slate-900/10 hover:bg-slate-900/20 rounded-md">
+      <div className="relative mb-4">
+        <img src={song.spotify_image} alt={song.title} className="shadow-lg aspect-square object-cover rounded-xl" />
+      </div>
+      <div className='flex flex-col justify-center w-full items-start'>
+        <p className=' text-md truncate font-semibold'>{song.title}</p>
+        <p className="text-gray-300 text-sm truncate">{song.artist}</p>
       </div> 
         
     </li>
