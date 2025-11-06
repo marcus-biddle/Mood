@@ -168,7 +168,7 @@ useEffect(() => {
         <img src={song.spotify_image} alt={song.title} className="shadow-lg aspect-square object-cover rounded-xl" />
       </div>
       <div className='flex flex-col justify-center w-full items-start'>
-        <p className=' text-md truncate font-semibold'>{song.title}</p>
+        <p className=' text-md truncate font-semibold max-w-full'>{song.title}</p>
         <p className="text-gray-300 text-sm truncate">{song.artist}</p>
       </div> 
         
