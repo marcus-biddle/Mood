@@ -3,6 +3,8 @@ import { FaRegHeart } from 'react-icons/fa';
 import { FaMusic } from 'react-icons/fa6';
 import { SongSearch } from './components/SongSearch';
 import {MoodSearch} from './components/moodSearch';
+import { AnimatedButtonInput } from './components/InputButton';
+import { MoodCategoryDropdown } from './components/CategoryDropdown';
 
 
 // const moodAttributes = [
@@ -86,7 +88,20 @@ useEffect(() => {
 }, [searchResults])
 
   return (
-    <div className=' relative min-h-screen items-center justify-center bg-linear-to-t from-slate-700 via-blue-500 to-teal-600 w-screen'>
+    <div className='realative min-h-screen items-center justify-center bg-linear-to-t bg-gray-900 p-4'>
+      <div className="relative bg-gray-700/10 backdrop-blur-3xl shadow-lg rounded-lg">
+        <div className='flex justify-between items-center gap-8 px-4 py-2'>
+        <div className='w-full overflow-hidden'>
+          <AnimatedButtonInput />
+        </div>
+        <div>Mood</div>
+      </div>
+      </div>
+      <div className='my-4'>
+        <MoodCategoryDropdown />
+      </div>
+      
+      
       <div className='w-full flex items-center justify-center p-8 gap-2'>
         <button onClick={() => setCurrentView(prev => prev === 'mood' ? 'choice' : 'mood')} className='bg-linear-to-br from-purple-500 to-pink-500 rounded-md p-3'>
           <FaRegHeart className='size-6' />
