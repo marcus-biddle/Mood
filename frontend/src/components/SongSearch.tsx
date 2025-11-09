@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { BsSearch } from 'react-icons/bs';
-import axiosClient from '../api/axiosClient';
 import { Songs } from '../api/songs';
 
 type Props = {

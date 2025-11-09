@@ -1,4 +1,3 @@
-import React from 'react';
 
 type Props = {
   batchName: string;
@@ -13,7 +12,7 @@ export const Batch = ({ batchName, batch }: Props) => {
       </div>
       <div className="flex overflow-x-auto space-x-4 py-2">
         {batch &&
-          batch.map((song, index) => (
+          batch.map((song) => (
             <div
               key={song.id}
               className="flex flex-col items-center backdrop-blur-xl transition-all duration-300 cursor-pointer group p-4 text-black bg-slate-900/10 hover:bg-slate-900/20 rounded-md min-w-[150px]"

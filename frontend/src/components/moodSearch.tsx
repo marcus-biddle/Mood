@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import axiosClient from '../api/axiosClient';
 import { Songs } from '../api/songs';
 
 type Props = {

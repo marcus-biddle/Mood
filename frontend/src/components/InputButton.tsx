@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from "motion/react"
-import { BsSearch } from 'react-icons/bs';
 import type { IconType } from "react-icons";
 
 type Props = {
