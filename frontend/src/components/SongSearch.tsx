@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BsSearch } from 'react-icons/bs';
 import axiosClient from '../api/axiosClient';
+import { Songs } from '../api/songs';
 
 type Props = {
     currentView: string;
@@ -41,8 +42,7 @@ export const SongSearch = ({
     console.log('query', query)
 
     try {
-      const response = await axiosClient.post('/api/search', { query });
-        const results = response.data.results;
+      const results = await Songs.search(query)
 
       if (!results) {
         setError(results || 'Search failed');

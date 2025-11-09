@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axiosClient from '../api/axiosClient';
+import { Songs } from '../api/songs';
 
 type Props = {
     setSearchResults: (results: []) => void;
@@ -18,13 +19,11 @@ export const MoodSearch = ({
     setError(null);
 
     try {
-      const response = await axiosClient.post('/api/find-mood-song', {
-        query: mood.trim(),
-      });
-      console.log(response.data.results)
-      setSearchResults(response.data.results || []);
+      const response = await Songs.findSongsByMood(mood)
+      console.log(response)
+      setSearchResults(response || []);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Search failed');
+      setError(err || 'Search failed');
       setSearchResults([]);
     } finally {
       setLoading(false);

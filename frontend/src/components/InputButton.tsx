@@ -1,9 +1,18 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from "motion/react"
 import { BsSearch } from 'react-icons/bs';
+import type { IconType } from "react-icons";
 
-export const AnimatedButtonInput = () => {
-  const [isExpanded, setIsExpanded] = useState(true);
+type Props = {
+    Icon: IconType,
+    inputPlaceholder: string
+}
+
+export const AnimatedButtonInput = ({
+    Icon,
+    inputPlaceholder
+}: Props) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
   const handleExpand = useCallback(() => {
@@ -40,7 +49,7 @@ export const AnimatedButtonInput = () => {
       initial={false}
       animate={{ maxWidth: isExpanded ? 1200 : 40, borderRadius: isExpanded ? 9999 : 6 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      className="relative flex items-center border rounded-lg overflow-hidden border-emerald-700"
+      className="relative flex items-center border rounded-lg overflow-hidden border-emerald-700 min-w-10"
     >
       <AnimatePresence mode="wait" initial={false}>
         {!isExpanded ? (
@@ -56,12 +65,12 @@ export const AnimatedButtonInput = () => {
             type="button"
             aria-label="Expand input"
           >
-            <BsSearch className='w-6 h-6 text-emerald-700 ' />
+            <Icon className='w-6 h-6 text-emerald-700 ' />
           </motion.button>
         ) : (
           <motion.div
             key="input-container"
-            className="flex items-center grow px-2 py-1 border border-emerald-700"
+            className="flex items-center grow px-2 py-1 border border-emerald-700 "
             initial={{ opacity: 0, borderRadius: 6 }}
             animate={{ opacity: 1,  borderRadius:9999}}
             exit={{ opacity: 0, borderRadius: 6 }}
@@ -74,7 +83,7 @@ export const AnimatedButtonInput = () => {
               onChange={(e) => setInputValue(e.target.value)}
               onBlur={handleCollapse}
               onKeyDown={handleKeyDown}
-              placeholder="Search for songs..."
+              placeholder={inputPlaceholder}
               className="grow outline-none px-2 py-1"
               aria-label="Search input"
             />

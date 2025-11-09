@@ -14,11 +14,12 @@ function delay(ms) {
 
 async function fetchMusicBrainzSongs() {
   const urls = [
-    'https://musicbrainz.org/ws/2/recording?query=tag:rap+AND+country:US&limit=100&fmt=json',
-    'https://musicbrainz.org/ws/2/recording?query=tag:pop+AND+country:US&limit=100&fmt=json',
-    'https://musicbrainz.org/ws/2/recording?query=tag:alternative%pop+AND+country:US&limit=100&fmt=json',
-    'https://musicbrainz.org/ws/2/recording?query=tag:sad%pop+AND+country:US&limit=100&fmt=json',
-    'https://musicbrainz.org/ws/2/recording?query=tag:sad%alternative+AND+country:US&limit=100&fmt=json'
+    'https://musicbrainz.org/ws/2/recording?query=Melanie%Martinez+AND+country:US&limit=100&fmt=json',
+    'https://musicbrainz.org/ws/2/recording?query=Jessie%Reyez+AND+country:US&limit=100&fmt=json',
+    'https://musicbrainz.org/ws/2/recording?query=tag:anime+AND+country:US&limit=100&fmt=json',
+    'https://musicbrainz.org/ws/2/recording?query=tag:trap+AND+country:US&limit=100&fmt=json',
+    'https://musicbrainz.org/ws/2/recording?query=tag:alt%trap+AND+country:US&limit=100&fmt=json',
+    'https://musicbrainz.org/ws/2/recording?query=Workout+AND+country:US&limit=100&fmt=json'
   ]
 
   let allRecordings = [];

@@ -5,7 +5,11 @@ import { SongSearch } from './components/SongSearch';
 import {MoodSearch} from './components/moodSearch';
 import { AnimatedButtonInput } from './components/InputButton';
 import { MoodCategoryDropdown } from './components/CategoryDropdown';
+import { IoMusicalNotesOutline } from "react-icons/io5";
+import { Songs } from './api/songs';
+import { Batch } from './components/Batch';
 
+const moodQueries = ['Fighting Crime In a Batsuit', 'Night Out With Friends', 'Weekend Beach Trip']
 
 // const moodAttributes = [
 //   "happy",
@@ -24,6 +28,7 @@ export default function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [currentView, setCurrentView] = useState('mood'); // 'choice', 'mood', 'song', 'both'
   const [songSearch, setSongSearch] = useState('');
+  const [batches, setBatches] = useState([])
 
 //   const handleSearch = async () => {
 //   const { data, error } = await supabase.rpc("search_songs_by_mood", {
@@ -87,13 +92,37 @@ useEffect(() => {
   }
 }, [searchResults])
 
+useEffect(() => {
+  if (batches.length < 1) {
+    const fetchBatches = async () => {
+      const allResponses: any = await Promise.all(
+        moodQueries.map(async (query) => {
+          const response = await Songs.findSongsByMood(query);
+          return response;
+        })
+      );
+      setBatches(allResponses);
+    };
+
+    fetchBatches();
+  }
+}, [batches.length, moodQueries]);
+
+console.log(batches)
+
+
   return (
     <div className='realative min-h-screen items-center justify-center bg-linear-to-t bg-gray-900 p-4'>
       <div className="relative bg-gray-700/10 backdrop-blur-3xl shadow-lg rounded-lg">
-        <div className='flex justify-between items-center gap-8 px-4 py-2'>
-        <div className='w-full overflow-hidden'>
-          <AnimatedButtonInput />
-        </div>
+        <div className='flex items-center justify-between px-4 py-2'>
+          <div className='flex gap-4'>
+            <div className='overflow-hidden'>
+              <AnimatedButtonInput Icon={FaRegHeart} inputPlaceholder={'Search by mood...'} />
+            </div>
+            <div className='overflow-hidden'>
+              <AnimatedButtonInput Icon={IoMusicalNotesOutline} inputPlaceholder={'Search by song or artist...'} />
+            </div>
+          </div>
         <div>Mood</div>
       </div>
       </div>
@@ -101,6 +130,13 @@ useEffect(() => {
         <MoodCategoryDropdown />
       </div>
       
+      <div>
+        {moodQueries.map((query, index) => (
+          <div key={index}>
+            <Batch batchName={query} batch={batches[index]} />
+          </div>
+        ))}
+      </div>
       
       <div className='w-full flex items-center justify-center p-8 gap-2'>
         <button onClick={() => setCurrentView(prev => prev === 'mood' ? 'choice' : 'mood')} className='bg-linear-to-br from-purple-500 to-pink-500 rounded-md p-3'>
