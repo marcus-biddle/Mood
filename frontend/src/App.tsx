@@ -133,8 +133,6 @@ useEffect(() => {
   }
 }, [batches.length, moodQueries]);
 
-console.log('THIS', moodQueries, batches)
-
 
   return (
     <div className='relative min-h-screen p-8'>

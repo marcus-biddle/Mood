@@ -1,5 +1,6 @@
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel";
+import { Skeleton } from "./ui/skeleton";
 
 type Props = {
   batchName: string;
@@ -20,8 +21,8 @@ export const Batch = ({ batchName, batch }: Props) => {
         className="w-full max-w-7xl"
         >
         <CarouselContent className="">
-          {batch &&
-          batch.map((song, index) => (
+          {batch ?
+          batch && batch.map((song, index) => (
             <CarouselItem key={index} className="py-4 basis-2/3 md:basis-1/8 min-w-2xs backdrop-blur-lg">
               <Card className="">
                 <CardContent className="aspect-auto">
@@ -41,7 +42,21 @@ export const Batch = ({ batchName, batch }: Props) => {
                 </CardFooter>
               </Card>
             </CarouselItem>
-          ))}
+          )) :
+          Array.from({ length: 10 }).map((_, index) => (
+            <CarouselItem key={index} className="py-4 basis-2/3 md:basis-1/8 min-w-2xs backdrop-blur-lg">
+              <Card className="">
+                <CardContent className="aspect-auto">
+                  <Skeleton className="h-[125px] w-full rounded-xl bg-slate-300" />
+                </CardContent>
+                <CardFooter className="flex flex-col gap-2 w-full">
+                    <Skeleton className="h-4 w-[250px] max-w-full rounded-xl bg-slate-300" />
+                    <Skeleton className="h-4 w-[250px] max-w-full rounded-xl bg-slate-300" />
+                </CardFooter>
+              </Card>
+            </CarouselItem>
+          ))
+          }
           
           {/* <CarouselItem className="md:basis-1/2 lg:basis-1/3">...</CarouselItem>
           <CarouselItem className="md:basis-1/2 lg:basis-1/3">...</CarouselItem> */}
