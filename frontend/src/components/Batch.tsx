@@ -1,3 +1,5 @@
+import { Card, CardContent, CardFooter } from "./ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "./ui/carousel";
 
 type Props = {
   batchName: string;
@@ -6,34 +8,45 @@ type Props = {
 
 export const Batch = ({ batchName, batch }: Props) => {
   return (
-    <div>
+    <div className="space-y-4">
       <div>
-        <h2>{batchName}</h2>
+        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">{batchName}</h3>
       </div>
-      <div className="flex overflow-x-auto space-x-4 py-2">
-        {batch &&
-          batch.map((song) => (
-            <div
-              key={song.id}
-              className="flex flex-col items-center backdrop-blur-xl transition-all duration-300 cursor-pointer group p-4 text-black bg-slate-900/10 hover:bg-slate-900/20 rounded-md min-w-[150px]"
-            >
-              <div className="relative mb-4">
-                <img
+      <div className="flex justify-center items-center">
+        <Carousel
+        opts={{
+        align: "start",
+        }}
+        className="w-full max-w-7xl"
+        >
+        <CarouselContent className="">
+          {batch &&
+          batch.map((song, index) => (
+            <CarouselItem key={index} className="py-4 basis-2/3 md:basis-1/8 min-w-2xs backdrop-blur-lg">
+              <Card className="">
+                <CardContent className="aspect-auto">
+                  <img
                   src={song.spotify_image}
                   alt={song.title}
-                  className="shadow-lg aspect-square object-cover rounded-xl"
+                  className="object-cover aspect-auto w-full h-full rounded-md"
                 />
-              </div>
-              <div className="flex flex-col justify-center w-full items-start">
-                <p className="text-md truncate font-semibold max-w-full">
-                  {song.title}
-                </p>
-                <p className="text-gray-300 text-sm truncate max-w-full">
-                  {song.artist}
-                </p>
-              </div>
-            </div>
+                </CardContent>
+                <CardFooter className="flex flex-col">
+                  <p className="text-md truncate font-semibold max-w-full">
+                    {song.title}
+                  </p>
+                  <p className="text-gray-300 text-sm truncate max-w-full">
+                    {song.artist}
+                  </p>
+                </CardFooter>
+              </Card>
+            </CarouselItem>
           ))}
+          
+          {/* <CarouselItem className="md:basis-1/2 lg:basis-1/3">...</CarouselItem>
+          <CarouselItem className="md:basis-1/2 lg:basis-1/3">...</CarouselItem> */}
+        </CarouselContent>
+        </Carousel>
       </div>
     </div>
   );

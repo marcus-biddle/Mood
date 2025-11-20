@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'react';
-import { FaRegHeart } from 'react-icons/fa';
-import { FaMusic } from 'react-icons/fa6';
-import { SongSearch } from './components/SongSearch';
-import {MoodSearch} from './components/moodSearch';
-import { AnimatedButtonInput } from './components/InputButton';
-import { MoodCategoryDropdown } from './components/CategoryDropdown';
-import { IoMusicalNotesOutline } from "react-icons/io5";
 import { Songs } from './api/songs';
 import { Batch } from './components/Batch';
+import { Input } from './components/ui/input';
+import { Spinner } from './components/ui/spinner';
+import { Card, CardContent, CardFooter } from './components/ui/card';
 
-const moodQueries = ['Fighting Crime In a Batsuit', 'Night Out With Friends', 'Weekend Beach Trip']
+const moodQueries = ['Gym Time', 'Party Anthem', 'Weekend Beach Trip']
 
 // const moodAttributes = [
 //   "happy",
@@ -26,10 +22,45 @@ const moodQueries = ['Fighting Crime In a Batsuit', 'Night Out With Friends', 'W
 
 export default function App() {
   const [searchResults, setSearchResults] = useState([]);
-  const [currentView, setCurrentView] = useState('mood'); // 'choice', 'mood', 'song', 'both'
+  const [currentView, setCurrentView] = useState<'search' | 'home'>('home'); // 'search', 'home'
   const [songSearch, setSongSearch] = useState('');
   const [batches, setBatches] = useState([])
+  // const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
+  const handleSearch = async (query: string) => {
+    console.log('Searching....', query)
+    // e.preventDefault();
+
+    setLoading(true);
+    setCurrentView('search');
+    // setError(null);
+
+    query = query.trim();
+    // Replace multiple spaces with a single space
+    query = query.replace(/\s+/g, ' ');
+    // Remove special characters except alphanumerics and spaces (customize as needed)
+    query = query.replace(/[^a-zA-Z0-9\s]/g, '');
+
+    console.log('query', query)
+
+    try {
+      const results = await Songs.search(query)
+
+      if (!results) {
+        // setError(results || 'Search failed');
+        setSearchResults([]);
+      } else {
+        console.log(results)
+        setSearchResults(results || []);
+      }
+    } catch (err) {
+      // setError('Network error');
+      setSearchResults([]);
+    }
+
+    setLoading(false);
+  }
 //   const handleSearch = async () => {
 //   const { data, error } = await supabase.rpc("search_songs_by_mood", {
 //     search_vector: chartData.datasets[0].data,
@@ -87,12 +118,6 @@ export default function App() {
 // };
 
 useEffect(() => {
-  if (searchResults.length > 0) {
-    setCurrentView('choice')
-  }
-}, [searchResults])
-
-useEffect(() => {
   if (batches.length < 1) {
     const fetchBatches = async () => {
       const allResponses: any = await Promise.all(
@@ -108,12 +133,29 @@ useEffect(() => {
   }
 }, [batches.length, moodQueries]);
 
-console.log(batches)
+console.log('THIS', moodQueries, batches)
 
 
   return (
-    <div className='realative min-h-screen items-center justify-center bg-linear-to-t bg-gray-900 p-4'>
-      <div className="relative bg-gray-700/10 backdrop-blur-3xl shadow-lg rounded-lg">
+    <div className='relative min-h-screen p-8'>
+      <div className=' aspect-auto mb-8'>
+        <Input 
+          type="search" 
+          placeholder="Search..." 
+          value={songSearch}
+          onChange={(e) => {
+              if (e.target.value === '') {
+                  setSearchResults([]);
+                  setSongSearch('')
+                  setCurrentView('home')
+              } else {
+                setSongSearch(e.target.value);
+                handleSearch(e.target.value);
+              }
+          }} 
+        />
+      </div>
+      {/* <div className="relative bg-gray-700/10 backdrop-blur-3xl shadow-lg rounded-lg">
         <div className='flex items-center justify-between px-4 py-2'>
           <div className='flex gap-4'>
             <div className='overflow-hidden'>
@@ -125,33 +167,61 @@ console.log(batches)
           </div>
         <div>Mood</div>
       </div>
-      </div>
-      <div className='my-4'>
+      </div> */}
+      {/* <div className='my-4'>
         <MoodCategoryDropdown />
-      </div>
+      </div> */}
       
-      <div>
-        {moodQueries.map((query, index) => (
-          <div key={index}>
-            <Batch batchName={query} batch={batches[index]} />
+      {/* <AudioComponent tracks={batches[0]}/> */}
+      
+      {currentView === 'home' ?
+        <div className='space-y-8'>
+          {moodQueries.map((query, index) => (
+            <div key={index}>
+              <Batch batchName={query} batch={batches[index]} />
+            </div>
+          ))}
+        </div> :
+        loading ? 
+        <div className='w-full h-screen flex justify-center items-center'>
+          <Spinner className='w-12 h-12' />
+        </div> :
+        <div className="mx-auto max-w-7xl">
+          <p className="text-muted-foreground text-sm">Results for "{songSearch}"</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 p-4">
+            {searchResults.map((song: any) => (
+              <Card className="">
+                <CardContent className="aspect-auto">
+                  <img
+                  src={song.spotify_image}
+                  alt={song.title}
+                  className="object-cover aspect-auto w-full h-full rounded-md"
+                />
+                </CardContent>
+                <CardFooter className="flex flex-col">
+                  <p className="text-md truncate font-semibold max-w-full">
+                    {song.title}
+                  </p>
+                  <p className="text-gray-300 text-sm truncate max-w-full">
+                    {song.artist}
+                  </p>
+                </CardFooter>
+              </Card>
+              // <li key={song.id} className="flex flex-col items-center backdrop-blur-3xl transition-all duration-300 cursor-pointer group p-4 text-black bg-slate-900/10 hover:bg-slate-900/20 rounded-md">
+              // <div className="relative mb-4">
+              //   <img src={song.spotify_image} alt={song.title} className="shadow-lg aspect-square object-cover rounded-xl" />
+              // </div>
+              // <div className='flex flex-col justify-center w-full items-start'>
+              //   <p className=' text-md truncate font-semibold max-w-full'>{song.title}</p>
+              //   <p className="text-gray-300 text-sm truncate max-w-full">{song.artist}</p>
+              // </div>
+              // </li>
+            ))}
           </div>
-        ))}
-      </div>
-      
-      <div className='w-full flex items-center justify-center p-8 gap-2'>
-        <button onClick={() => setCurrentView(prev => prev === 'mood' ? 'choice' : 'mood')} className='bg-linear-to-br from-purple-500 to-pink-500 rounded-md p-3'>
-          <FaRegHeart className='size-6' />
-        </button>
-        <button onClick={() => setCurrentView(prev => prev === 'song' ? 'choice' : 'song')} className='bg-linear-to-br from-blue-500 to-cyan-500 rounded-md p-3'>
-          <FaMusic className='size-6' />
-        </button>
-        {/* <button onClick={() => setOpenFilters(true)} className="bg-black p-3 rounded-md w-full flex items-center justify-center gap-2">
-          <BsSliders2 className='size-6' />
-          <span className=' text-lg'>Filter</span>
-        </button> */}
-      </div>
+        </div>
+      }
 
-      {(currentView === 'mood' || currentView === 'both') && (
+      {/* {(currentView === 'mood' || currentView === 'both') && (
           <div className="bg-white rounded-2xl shadow-lg border-2 border-purple-200 p-5 space-y-3 mx-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-linear-to-br from-purple-500 to-pink-500 rounded-full">
@@ -162,18 +232,10 @@ console.log(batches)
 
             <MoodSearch setSearchResults={setSearchResults} />
             
-            {/* <textarea
-              value={mood}
-              onChange={(e) => setMood(e.target.value)}
-              placeholder="Express yourself... feeling happy, nostalgic, adventurous, peaceful..."
-              className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-400 min-h-[100px] text-base"
-              autoFocus
-            /> */}
-            
           </div>
-        )}
+        )} */}
 
-        {currentView === 'song' && (
+        {/* {currentView === 'song' && (
           <div className="bg-white rounded-2xl shadow-md p-5 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500 mx-4">
             <div className="flex items-center gap-2">
               <div className="p-3 bg-linear-to-br from-blue-500 to-cyan-500 rounded-full">
@@ -184,7 +246,7 @@ console.log(batches)
             
             <SongSearch currentView={currentView} songSearch={songSearch} setSongSearch={setSongSearch} setSearchResults={setSearchResults} />
           </div>
-        )}
+        )} */}
 
       {/* <div className='min-h-[75vh]'>
         <Radar
@@ -211,22 +273,7 @@ console.log(batches)
         ))}
       </div> */}
 
-      <div className="max-w-7xl mx-auto">
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 p-4">
-  {searchResults.map((song: any) => (
-    <li key={song.id} className="flex flex-col items-center backdrop-blur-3xl transition-all duration-300 cursor-pointer group p-4 text-black bg-slate-900/10 hover:bg-slate-900/20 rounded-md">
-      <div className="relative mb-4">
-        <img src={song.spotify_image} alt={song.title} className="shadow-lg aspect-square object-cover rounded-xl" />
-      </div>
-      <div className='flex flex-col justify-center w-full items-start'>
-        <p className=' text-md truncate font-semibold max-w-full'>{song.title}</p>
-        <p className="text-gray-300 text-sm truncate max-w-full">{song.artist}</p>
-      </div> 
-        
-    </li>
-  ))}
-</ul>
-      </div>
+      
     </div>
   );
 }
