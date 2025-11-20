@@ -11,5 +11,5 @@ Came across key words such as "embeddings" and "vector searches" where I discove
 - How to ingest songs to clean it up for my database. Currently, the database has about 1000 songs.
 
 ## How it looks 📷
-<img width="1860" height="1005" alt="screenshot-1763607524590" src="https://github.com/user-attachments/assets/fdb54c0b-724a-49bb-861b-183c884831ec" />
-<img width="1860" height="1005" alt="screenshot-1763607553093" src="https://github.com/user-attachments/assets/736adb44-9514-4a19-8fa2-fa5135e1611f" />
+<img width="1000" height="720" alt="screenshot-1763608075913" src="https://github.com/user-attachments/assets/1f6089c1-344e-40e8-8fe0-3e959ebf5748" />
+<img width="1000" height="720" alt="screenshot-1763607553093" src="https://github.com/user-attachments/assets/736adb44-9514-4a19-8fa2-fa5135e1611f" />
